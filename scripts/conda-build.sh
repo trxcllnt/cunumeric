@@ -14,8 +14,8 @@ conda mambabuild \
     --numpy 1.22 \
     --python $PYTHON_VERSION \
     --override-channels \
-    -c file:///tmp/conda-build/legate_core \
     -c conda-forge -c nvidia \
+    -c file:///tmp/conda-build/legate_core \
     --croot /tmp/conda-build/cunumeric \
     --prefix-length 3 \
     --no-test \

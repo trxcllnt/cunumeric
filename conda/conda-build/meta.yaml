@@ -61,15 +61,9 @@ build:
     - cpu_only
   script_env:
     - CPU_ONLY=1
-{% endif %}
-{% if gpu_enabled_bool %}
-# prevent nccl from pulling in cudatoolkit
-# once an nccl package compatible with cuda-* packages is introduced, this can be removed
-#  ignore_run_exports:
-#    - cudatoolkit
+{% else %}
   ignore_run_exports_from:
     - cuda-nvcc
-    - legate-core
 {% endif %}
 
 requirements:
@@ -84,10 +78,13 @@ requirements:
     - openblas =* =*openmp*
     - cmake {{ cmake_version }}
 {% if not gpu_enabled_bool %}
-    - legate-core >={{ core_version }} =*_cpu
+    - legate-core ={{ core_version }} =*_cpu
 {% else %}
-    - legate-core >={{ core_version }}
+    - legate-core ={{ core_version }}
+    - cudatoolkit ={{ cuda_version }}
     - cuda-nvcc ={{ cuda_version }}
+    - cuda-cccl ={{ cuda_version }}
+    - cuda-cudart ={{ cuda_version }}
     - cuda-driver-dev ={{ cuda_version }}
     - cuda-cudart-dev ={{ cuda_version }}
     - cuda-nvtx ={{ cuda_version }}
@@ -113,12 +110,12 @@ requirements:
     - opt_einsum >=3.3
     - scipy
     - typing_extensions
-{% if gpu_enabled_bool %}
-    - __cuda >={{ cuda_version }}
-{% endif %}
 
   run_constrained:
     - __glibc >=2.17  # [linux]
+{% if gpu_enabled_bool %}
+    - __cuda >={{ cuda_version }}
+{% endif %}
 
 about:
   home: https://github.com/nv-legate/cunumeric
