@@ -42,3 +42,15 @@ else mamba env create -n $env_name -f "/tmp/$env_yaml"; \
 fi
 
 sed -ri "s/conda activate base/conda activate $env_name/g" ~/.bashrc;
+
+cat <<EOF > /workspaces/.clangd
+If:
+  PathMatch: legate\.core/.*
+CompileFlags:
+  CompilationDatabase: legate.core/_skbuild/linux-$(uname -m)-${PYTHON_VERSION}/cmake-build
+---
+If:
+  PathMatch: cunumeric/.*
+CompileFlags:
+  CompilationDatabase: cunumeric/_skbuild/linux-$(uname -m)-${PYTHON_VERSION}/cmake-build
+EOF
