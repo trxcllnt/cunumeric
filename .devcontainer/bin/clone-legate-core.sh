@@ -2,32 +2,26 @@
 
 if [[ ! -f /workspaces/legate.core/scripts/generate-conda-envs.py ]]; then
 
-    GHHOSTS="$HOME/.config/gh/hosts.yml";
+    if [[ -z "$GITHUB_USER" ]]; then
+        gh auth login -p ssh --web;
+    fi
 
     if [[ -z "$GITHUB_USER" ]]; then
-        if [[ -n "$GITHUB_TOKEN" ]]; then
-            gh auth login -p ssh --web;
-        elif [[ ! -f "$GHHOSTS" ]]; then
-            gh auth login -p ssh --web;
+        if [[ -f "$HOME/.config/gh/hosts.yml" ]]; then
+            GITHUB_USER="$(grep --color=never 'user:' "$HOME/.config/gh/hosts.yml" | cut -d ':' -f2 | tr -d '[:space:]' || echo '')";
         fi
     fi
 
-    GH_USER="$GITHUB_USER"
-
-    if [[ -z "$GH_USER" ]]; then
-        GH_USER="$(grep --color=never 'user:' "$GHHOSTS" | cut -d ':' -f2 | tr -d '[:space:]' || echo '')";
-    fi
-
-    if [[ -z "$GH_USER" ]]; then
+    if [[ -z "$GITHUB_USER" ]]; then
         exit 1;
     fi
 
-    REPO="$GH_USER/legate.core";
-    FORK="$(gh repo list $GH_USER --fork --json name --jq ". | map(select(.name == \"legate.core\")) | map(.name)[]")";
+    REPO="$GITHUB_USER/legate.core";
+    FORK="$(gh repo list $GITHUB_USER --fork --json name --jq ". | map(select(.name == \"legate.core\")) | map(.name)[]")";
 
     if [[ ! "$FORK" ]]; then
         UPSTREAM="nv-legate/legate.core";
-        ORIGIN_URL="github.com/$GH_USER/legate.core";
+        ORIGIN_URL="github.com/$GITHUB_USER/legate.core";
         UPSTREAM_URL="github.com/$UPSTREAM";
 
         while true; do
