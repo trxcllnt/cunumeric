@@ -57,6 +57,18 @@
         "files.trimFinalNewlines": true,
         "files.insertFinalNewline": true,
         "files.trimTrailingWhitespace": true,
+        "clangd.arguments": [
+            "--log=info",
+            "--debug-origin",
+            "--pch-storage=disk",
+            "--completion-parse=auto",
+            "--fallback-style=Google",
+            "--background-index=true",
+            "--all-scopes-completion",
+            "--header-insertion=iwyu",
+            "--completion-style=detailed",
+            "--header-insertion-decorators"
+          ],
         "files.associations": {
           "*.cu": "cuda-cpp",
           "*.cuh": "cuda-cpp",
