@@ -4,9 +4,13 @@ if [[ ! -f /workspaces/legate.core/scripts/generate-conda-envs.py ]]; then
 
     GHHOSTS="$HOME/.config/gh/hosts.yml";
 
-    if [[ ! -f "$GHHOSTS" ]]; then gh auth login; fi
+    if [[ -z "$GITHUB_USER" || ! -f "$GHHOSTS" ]]; then gh auth login; fi
 
-    GH_USER="$(grep --color=never 'user:' "$GHHOSTS" | cut -d ':' -f2 | tr -d '[:space:]')";
+    GH_USER="$GITHUB_USER"
+
+    if [[ -z "$GH_USER" ]]; then
+        GH_USER="$(grep --color=never 'user:' "$GHHOSTS" | cut -d ':' -f2 | tr -d '[:space:]' || echo '')";
+    fi
 
     if [[ -z "$GH_USER" ]]; then
         exit 1;

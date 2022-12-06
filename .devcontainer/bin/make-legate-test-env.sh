@@ -1,5 +1,11 @@
 #! /usr/bin/env bash
 
+if [[ ! -f /workspaces/legate.core/scripts/generate-conda-envs.py ]]; then
+    >&2 echo "legate.core/scripts/generate-conda-envs.py not found!"
+    >&2 echo "Please mount or clone legate.core to /workspaces/legate.core"
+    exit 1
+fi
+
 CUDA_VERSION=${CUDA_VERSION:-11.8}
 
 if [ -z "$PYTHON_VERSION" ]; then
@@ -7,8 +13,16 @@ if [ -z "$PYTHON_VERSION" ]; then
 fi
 
 env_yaml="environment-test-linux-py${PYTHON_VERSION}-cuda${CUDA_VERSION}-compilers-openmpi.yaml"
-env_name="legate-test-$(cd /workspaces/cunumeric; git rev-parse --abbrev-ref HEAD)"
-env_name="${env_name//\//_}"
+
+# We can do this if we want a conda env per cunumeric branch.
+# However, that will change the include paths so new branches
+# won't benefit from sccache the first time they're built.
+# env_name="legate-test-$(cd /workspaces/cunumeric; git rev-parse --abbrev-ref HEAD)"
+# env_name="${env_name//\//_}"
+
+# Use a consistent name and assume re-running `make-legate-test-env` after switching
+# branches will be fast because we use mamba and most packages will be in the local
+# conda package cache.
 env_name="legate-test"
 
 /opt/legate/bin/clone-legate-core;
