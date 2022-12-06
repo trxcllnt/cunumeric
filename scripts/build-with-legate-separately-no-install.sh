@@ -21,7 +21,8 @@ if [[ -n "$(which ninja)" ]]; then cmake_args+=" -GNinja"; fi
 # Add other build options here as desired
 cmake_args+="
 -D CMAKE_CUDA_ARCHITECTURES=NATIVE
--D legate_core_ROOT:STRING=\"$legate_core_ROOT\"";
+-D legate_core_ROOT:STRING=\"$legate_core_ROOT\"
+$@";
 
 # Use all but 2 threads to compile
 ninja_args="-j$(nproc --ignore=2)"

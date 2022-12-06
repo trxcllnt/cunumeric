@@ -22,7 +22,8 @@ if [[ -n "$(which ninja)" ]]; then cmake_args+=" -GNinja"; fi
 cmake_args+="
 -D Legion_USE_CUDA=ON
 -D Legion_USE_OpenMP=ON
--D CMAKE_CUDA_ARCHITECTURES=NATIVE";
+-D CMAKE_CUDA_ARCHITECTURES=NATIVE
+$@";
 
 # Use all but 2 threads to compile
 ninja_args="-j$(nproc --ignore=2)"
