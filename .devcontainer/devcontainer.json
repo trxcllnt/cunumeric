@@ -85,8 +85,8 @@
     },
     "codespaces": {
       "repositories": {
-        "nv-legate/*": {
-          "permissions": "write-all"
+        "nv-legate/legate.core": {
+          "permissions": "read-all"
         }
       }
     }
