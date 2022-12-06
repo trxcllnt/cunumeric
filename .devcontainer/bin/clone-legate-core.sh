@@ -4,7 +4,13 @@ if [[ ! -f /workspaces/legate.core/scripts/generate-conda-envs.py ]]; then
 
     GHHOSTS="$HOME/.config/gh/hosts.yml";
 
-    if [[ -z "$GITHUB_USER" || ! -f "$GHHOSTS" ]]; then gh auth login; fi
+    if [[ -z "$GITHUB_USER" ]]; then
+        if [[ -n "$GITHUB_TOKEN" ]]; then
+            gh auth login -p ssh --web;
+        elif [[ ! -f "$GHHOSTS" ]]; then
+            gh auth login -p ssh --web;
+        fi
+    fi
 
     GH_USER="$GITHUB_USER"
 
