@@ -36,6 +36,11 @@ EOF
 
 sed -ri "s/legate-test/$env_name/g" "/tmp/$env_yaml";
 
+# Strip out clang and clang-tools
+cat "/tmp/$env_yaml" \
+  | grep -v -P '^(.*?)\-(.*?)(clang|clang-tools)(.*?)$' \
+  | sponge "/tmp/$env_yaml"
+
 if [[ "$(conda info -e | grep -q $env_name; echo $?)" == 0 ]]; \
 then mamba env update -n $env_name -f "/tmp/$env_yaml"; \
 else mamba env create -n $env_name -f "/tmp/$env_yaml"; \
@@ -44,6 +49,12 @@ fi
 sed -ri "s/conda activate base/conda activate $env_name/g" ~/.bashrc;
 
 cat <<EOF > /workspaces/.clangd
+If:
+  PathMatch: .*\.cuh?
+CompileFlags:
+  Add:
+    - -stdlib=libstdc++
+---
 If:
   PathMatch: legate\.core/.*
 CompileFlags:
