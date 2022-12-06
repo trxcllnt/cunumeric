@@ -82,13 +82,6 @@
           "editor.defaultFormatter": "xaver.clang-format"
         }
       }
-    },
-    "codespaces": {
-      "repositories": {
-        "nv-legate/legate.core": {
-          "permissions": "read-all"
-        }
-      }
     }
   }
 }
