@@ -1,11 +1,5 @@
 #! /usr/bin/env bash
 
-if [[ ! -f /workspaces/legate.core/scripts/generate-conda-envs.py ]]; then
-    >&2 echo "legate.core/scripts/generate-conda-envs.py not found!"
-    >&2 echo "Please mount or clone legate.core to /workspaces/legate.core"
-    exit 1
-fi
-
 CUDA_VERSION=${CUDA_VERSION:-11.8}
 
 if [ -z "$PYTHON_VERSION" ]; then
