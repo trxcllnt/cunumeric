@@ -287,12 +287,6 @@ def install_cunumeric(
     if install_dir is not None:
         pip_install_cmd += ["--root", "/", "--prefix", str(install_dir)]
 
-    if cmake_generator:
-        pip_install_cmd += [
-            "--install-option=--skip-generator-test",
-            f"--install-option=--generator={cmake_generator}"
-        ]
-
     if editable:
         # editable implies build_isolation = False
         pip_install_cmd += ["--no-deps", "--no-build-isolation", "--editable"]
@@ -366,6 +360,7 @@ def install_cunumeric(
     cmd_env.update(
         {
             "CMAKE_ARGS": " ".join(cmake_flags),
+            "CMAKE_GENERATOR": cmake_generator,
             "SKBUILD_BUILD_OPTIONS": " ".join(ninja_flags),
         }
     )
@@ -495,7 +490,7 @@ def driver():
         "--cmake-generator",
         dest="cmake_generator",
         required=False,
-        default=(None if shutil.which("ninja") is None else "Ninja"),
+        default=os.environ.get("CMAKE_GENERATOR", "Unix Makefiles" if shutil.which("ninja") is None else "Ninja"),
         choices=["Ninja", "Unix Makefiles", None],
         help="The CMake makefiles generator",
     )
