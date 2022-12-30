@@ -1,13 +1,13 @@
 #! /usr/bin/env bash
 
 ##
-# Try to reopen this vscode window to the /workspaces/workspace.code-workspace file.
+# Try to reopen this vscode window to the $HOME/workspace.code-workspace file.
 ##
 
-set -ux;
+set -u;
 
 _exit=0;
-_file="/workspaces/workspace.code-workspace";
+_file="$HOME/workspace.code-workspace";
 _code="$(echo /vscode/vscode-server/bin/linux-*/*/bin/remote-cli/code)";
 
 # Only run if in a vscode remote containers session.
@@ -20,6 +20,8 @@ if [[ "${REMOTE_CONTAINERS:-false}" == true ]]; then
         _exit=$?;
         if [[ $_exit == 0 ]]; then break; fi
     done
+else
+    cp -ar "$_file" /workspaces/;
 fi
 
 exit $_exit;

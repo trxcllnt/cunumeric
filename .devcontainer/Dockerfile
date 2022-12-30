@@ -55,7 +55,7 @@ EOF
 
 SHELL ["/bin/bash", "-c"]
 
-COPY --chown=coder:coder workspace.code-workspace /workspaces/
+COPY --chown=coder:coder workspace.code-workspace /home/coder/
 
 COPY --chown=root:root bin/clone-legion.sh /opt/legate/bin/clone-legion
 COPY --chown=root:root bin/clone-github-repo.sh /opt/legate/bin/clone-github-repo
