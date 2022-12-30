@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
 
-if [[ ! -f "$HOME/legion/CMakeLists.txt" ]]; then
+if [ ! -d "/workspaces/legion/.git" ]; then
     clone-gitlab-repo "StanfordLegion" "legion";
 fi

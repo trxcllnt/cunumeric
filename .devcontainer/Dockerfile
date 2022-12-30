@@ -27,6 +27,15 @@ DEBIAN_FRONTEND=noninteractive apt install    \
     /usr/local/src/gitlab-cli/gitlab-cli.deb  \
     ;
 
+mkdir -m 0777 -p /workspaces /workspaces/{.cache,.conda,legion,legate,cunumeric};
+
+rm -rf /home/coder/.{cache,conda};
+ln -s /workspaces/.cache /home/coder/.cache;
+ln -s /workspaces/.conda /home/coder/.conda;
+ln -s /workspaces/legion /home/coder/legion;
+ln -s /workspaces/legate /home/coder/legate;
+ln -s /workspaces/cunumeric /home/coder/cunumeric;
+
 sed -i -re 's/^HISTSIZE=.*$/HISTSIZE=;/g' /home/coder/.bashrc; \
 sed -i -re 's/^HISTFILESIZE=.*$/HISTFILESIZE=;/g' /home/coder/.bashrc; \
 cat <<EOF2 >> /home/coder/.bashrc
@@ -46,7 +55,7 @@ EOF
 
 SHELL ["/bin/bash", "-c"]
 
-COPY --chown=coder:coder workspace.code-workspace /home/coder/
+COPY --chown=coder:coder workspace.code-workspace /workspaces/
 
 COPY --chown=root:root bin/clone-legion.sh /opt/legate/bin/clone-legion
 COPY --chown=root:root bin/clone-github-repo.sh /opt/legate/bin/clone-github-repo

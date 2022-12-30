@@ -36,4 +36,6 @@ Fork \`$UPSTREAM_URL\` into \`$ORIGIN_URL\` now (y/n)? " CHOICE </dev/tty
     done;
 fi
 
-gh repo clone "$REPO" "$HOME/$NAME";
+if [ ! -d "/workspaces/${3:-$NAME}/.git" ]; then
+    gh repo clone "$REPO" "/workspaces/${3:-$NAME}";
+fi

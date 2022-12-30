@@ -8,31 +8,31 @@
   "hostRequirements": {
     "gpu": true
   },
-  "initializeCommand": "mkdir -p ../.cache ../.conda ../legion ../legate.core",
+  "initializeCommand": "mkdir -p ../.cache ../.conda ../legion ../legate",
   "updateContentCommand": ["/opt/legate/bin/make-legate-test-env"],
+  "postStartCommand": ["/opt/legate/bin/clone-legion"],
   "postAttachCommand": ["/opt/legate/bin/open-vscode-workspace"],
-  "workspaceFolder": "/home/coder",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/home/coder/${localWorkspaceFolderBasename},type=bind,consistency=cached",
+  "workspaceFolder": "/workspaces",
   "mounts": [
     {
       "type": "bind",
-      "target": "/home/coder/.cache",
+      "target": "/workspaces/.cache",
       "source": "${localWorkspaceFolder}/../.cache"
     },
     {
       "type": "bind",
-      "target": "/home/coder/.conda",
+      "target": "/workspaces/.conda",
       "source": "${localWorkspaceFolder}/../.conda"
     },
     {
       "type": "bind",
-      "target": "/home/coder/legion",
+      "target": "/workspaces/legion",
       "source": "${localWorkspaceFolder}/../legion"
     },
     {
       "type": "bind",
-      "target": "/home/coder/legate.core",
-      "source": "${localWorkspaceFolder}/../legate.core"
+      "target": "/workspaces/legate",
+      "source": "${localWorkspaceFolder}/../legate"
     }
   ],
   "containerEnv": {
@@ -79,16 +79,16 @@
         },
         "python.linting.enabled": true,
         "python.linting.pylintEnabled": true,
-        "python.defaultInterpreterPath": "/home/coder/.conda/envs/legate-test/bin/python",
-        "python.formatting.autopep8Path": "/home/coder/.conda/envs/legate-test/bin/autopep8",
-        "python.formatting.blackPath": "/home/coder/.conda/envs/legate-test/bin/black",
-        "python.formatting.yapfPath": "/home/coder/.conda/envs/legate-test/bin/yapf",
-        "python.linting.banditPath": "/home/coder/.conda/envs/legate-test/bin/bandit",
-        "python.linting.flake8Path": "/home/coder/.conda/envs/legate-test/bin/flake8",
-        "python.linting.mypyPath": "/home/coder/.conda/envs/legate-test/bin/mypy",
-        "python.linting.pycodestylePath": "/home/coder/.conda/envs/legate-test/bin/pycodestyle",
-        "python.linting.pydocstylePath": "/home/coder/.conda/envs/legate-test/bin/pydocstyle",
-        "python.linting.pylintPath": "/home/coder/.conda/envs/legate-test/bin/pylint",
+        "python.defaultInterpreterPath": "/workspaces/.conda/envs/legate-test/bin/python",
+        "python.formatting.autopep8Path": "/workspaces/.conda/envs/legate-test/bin/autopep8",
+        "python.formatting.blackPath": "/workspaces/.conda/envs/legate-test/bin/black",
+        "python.formatting.yapfPath": "/workspaces/.conda/envs/legate-test/bin/yapf",
+        "python.linting.banditPath": "/workspaces/.conda/envs/legate-test/bin/bandit",
+        "python.linting.flake8Path": "/workspaces/.conda/envs/legate-test/bin/flake8",
+        "python.linting.mypyPath": "/workspaces/.conda/envs/legate-test/bin/mypy",
+        "python.linting.pycodestylePath": "/workspaces/.conda/envs/legate-test/bin/pycodestyle",
+        "python.linting.pydocstylePath": "/workspaces/.conda/envs/legate-test/bin/pydocstyle",
+        "python.linting.pylintPath": "/workspaces/.conda/envs/legate-test/bin/pylint",
         "python.terminal.activateEnvironment": false,
         "python.testing.promptToConfigure": false,
         "python.testing.autoTestDiscoverOnSaveEnabled": false,
