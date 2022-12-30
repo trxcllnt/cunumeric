@@ -6,12 +6,12 @@ if [ -z "$PYTHON_VERSION" ]; then
     PYTHON_VERSION="$(python3 --version 2>&1 | cut -d' ' -f2 | cut -d'.' -f3 --complement)"
 fi
 
-env_yaml="/tmp/environment-test-linux-py${PYTHON_VERSION}-cuda${CUDA_VERSION}-compilers-openmpi.yaml"
+env_yaml="/tmp/environment-test-linux-py${PYTHON_VERSION}-cuda${CUDA_VERSION}-compilers-openmpi.yaml";
 
 # Use a consistent name and assume re-running `make-legate-test-env` after switching
 # branches will be fast because we use mamba and most packages will be in the local
 # conda package cache.
-env_name="legate"
+env_name="legate";
 
 /opt/legate/bin/clone-legate-core;
 
@@ -33,8 +33,8 @@ sed -i -re "s/legate-test/$env_name/g" "$env_yaml";
 sed -i -re "s/^(\s+\- clang(-tools)?)(.*?)$//g" "$env_yaml";
 
 if [[ "$(conda info -e | grep -q "$env_name"; echo $?)" == 0 ]];
-then mamba env update -n "$env_name" -f "$env_yaml";
-else mamba env create -n "$env_name" -f "$env_yaml";
+then mamba env update -q -n "$env_name" -f "$env_yaml";
+else mamba env create -q -n "$env_name" -f "$env_yaml";
 fi
 
 . /opt/conda/etc/profile.d/conda.sh && conda activate "$env_name";

@@ -39,7 +39,7 @@ ln -s /workspaces/cunumeric /home/coder/cunumeric;
 sed -i -re 's/^HISTSIZE=.*$/HISTSIZE=;/g' /home/coder/.bashrc; \
 sed -i -re 's/^HISTFILESIZE=.*$/HISTFILESIZE=;/g' /home/coder/.bashrc; \
 cat <<EOF2 >> /home/coder/.bashrc
-HISTFILE="\$HOME/cunumeric/.devcontainer/._bash_history";
+HISTFILE="/workspaces/.cache/._bash_history";
 PROMPT_COMMAND="history -a; \$PROMPT_COMMAND";
 mkdir -p "\$(dirname \$HISTFILE)";
 touch "\$HISTFILE";
