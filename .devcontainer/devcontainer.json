@@ -10,8 +10,9 @@
   },
   "initializeCommand": "mkdir -p ../.cache ../.conda ../legion ../legate",
   "updateContentCommand": ["/opt/legate/bin/make-legate-test-env"],
-  "postStartCommand": "/opt/legate/bin/clone-legion",
-  "postAttachCommand": "/opt/legate/bin/open-vscode-workspace",
+  "postStartCommand": ["/bin/bash", "-li", "/opt/legate/bin/clone-legion"],
+  "postAttachCommand": ["/bin/bash", "-li", "/opt/legate/bin/open-vscode-workspace"],
+  // "postStartCommand": "cd /opt/legate/bin; ./clone-legion; ./open-vscode-workspace;",
   "workspaceFolder": "/workspaces",
   "mounts": [
     {
