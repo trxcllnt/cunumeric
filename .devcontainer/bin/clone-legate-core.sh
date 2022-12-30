@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+set -x;
+
 generate_conda_envs_py="legate/scripts/generate-conda-envs.py";
 
 if [ ! -d "/workspaces/legate/.git" ]; then
