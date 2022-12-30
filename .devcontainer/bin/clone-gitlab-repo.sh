@@ -2,7 +2,7 @@
 
 set -x;
 
-if [[ $(glab auth status &>/dev/null; echo $?) != 0 ]]; then
+if [[ $(glab auth status 2>&1 | grep 401 &>/dev/null; echo $?) == 0 ]]; then
     glab auth login --hostname gitlab.com;
 fi
 
