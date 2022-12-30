@@ -30,19 +30,13 @@ DEBIAN_FRONTEND=noninteractive apt install    \
 gh completion -s bash | tee /etc/bash_completion.d/gh >/dev/null;
 glab completion -s bash | tee /etc/bash_completion.d/glab >/dev/null;
 
-mkdir -m 0777 -p /workspaces /workspaces/{.cache,.conda,legion,legate,cunumeric};
-
-rm -rf /home/coder/.{cache,conda};
-ln -s /workspaces/.cache /home/coder/.cache;
-ln -s /workspaces/.conda /home/coder/.conda;
-ln -s /workspaces/legion /home/coder/legion;
-ln -s /workspaces/legate /home/coder/legate;
-ln -s /workspaces/cunumeric /home/coder/cunumeric;
+mkdir -m 0755 -p /home/coder/{.cache,.conda,legion,legate,cunumeric};
+chown -R coder:coder /home/coder;
 
 sed -i -re 's/^HISTSIZE=.*$/HISTSIZE=;/g' /home/coder/.bashrc;
 sed -i -re 's/^HISTFILESIZE=.*$/HISTFILESIZE=;/g' /home/coder/.bashrc;
 cat <<EOF2 >> /home/coder/.bashrc
-HISTFILE="/workspaces/.cache/._bash_history";
+HISTFILE="/home/coder/.cache/._bash_history";
 PROMPT_COMMAND="history -a; \$PROMPT_COMMAND";
 mkdir -p "\$(dirname \$HISTFILE)";
 touch "\$HISTFILE";
@@ -54,18 +48,22 @@ rm -rf \
     /var/cache/apt/* \
     /var/lib/apt/lists/*; \
 
+for x in clone-legion         \
+         clone-legate-core    \
+         make-legate-test-env ; do
+    mkdir -p /opt/legate/bin;
+    touch /opt/legate/bin/$x.sh;
+    chmod +x /opt/legate/bin/$x.sh;
+    update-alternatives --install /usr/bin/$x $x /opt/legate/bin/$x.sh 0;
+done
+
 EOF
 
 SHELL ["/bin/bash", "-c"]
 
 COPY --chown=coder:coder workspace.code-workspace /home/coder/
 
-COPY --chown=root:root bin/clone-legion.sh /opt/legate/bin/clone-legion
-COPY --chown=root:root bin/clone-github-repo.sh /opt/legate/bin/clone-github-repo
-COPY --chown=root:root bin/clone-gitlab-repo.sh /opt/legate/bin/clone-gitlab-repo
-COPY --chown=root:root bin/clone-legate-core.sh /opt/legate/bin/clone-legate-core
-COPY --chown=root:root bin/make-legate-test-env.sh /opt/legate/bin/make-legate-test-env
-COPY --chown=root:root bin/open-vscode-workspace.sh /opt/legate/bin/open-vscode-workspace
+COPY --chown=root:root opt/legate/bin /opt/legate/bin
 
 ENV SCCACHE_S3_USE_SSL=true
 ENV SCCACHE_IDLE_TIMEOUT=32768

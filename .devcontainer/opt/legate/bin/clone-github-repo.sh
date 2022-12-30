@@ -1,22 +1,7 @@
 #! /usr/bin/env bash
 
-if [[ $(gh auth status &>/dev/null; echo $?) != 0 ]]; then
-    if [[ "${CODESPACES:-false}" == true ]]; then
-        gh config set git_protocol https;
-    fi
-    gh auth login --web;
-    gh auth setup-git --hostname github.com;
-fi
-
-if [[ -z "$GITHUB_USER" ]]; then
-    if [[ -f "$HOME/.config/gh/hosts.yml" ]]; then
-        GITHUB_USER="$(grep --color=never 'user:' "$HOME/.config/gh/hosts.yml" | cut -d ':' -f2 | tr -d '[:space:]' || echo '')";
-    fi
-fi
-
-if [[ -z "$GITHUB_USER" ]]; then
-    exit 1;
-fi
+. /opt/legate/bin/init-github-cli.sh || exit $?;
+if [[ -z "$GITHUB_USER" ]]; then exit 1; fi
 
 NAME="$2";
 UPSTREAM="$1/$NAME";
@@ -40,6 +25,6 @@ Fork \`$UPSTREAM_URL\` into \`$ORIGIN_URL\` now (y/n)? " CHOICE </dev/tty
     done;
 fi
 
-if [[ ! -d "/workspaces/${3:-$NAME}/.git" ]]; then
-    gh repo clone "$REPO" "/workspaces/${3:-$NAME}";
+if [[ ! -d ~/${3:-$NAME}/.git ]]; then
+    gh repo clone "$REPO" ~/${3:-$NAME};
 fi

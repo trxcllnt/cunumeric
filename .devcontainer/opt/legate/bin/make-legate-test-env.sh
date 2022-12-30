@@ -13,12 +13,17 @@ env_yaml="/tmp/environment-test-linux-py${PYTHON_VERSION}-cuda${CUDA_VERSION}-co
 # conda package cache.
 env_name="legate";
 
-/opt/legate/bin/clone-legate-core;
+if [[ ! -f ~/legate/scripts/generate-conda-envs.py ]]; then
+    2>& echo "ERR: Cannot create $env_name conda env due to";
+    2>& echo "missing ~/legate/scripts/generate-conda-envs.py!";
+    2>& echo "Please run `clone-legate-core` first.";
+    exit 0;
+fi
 
 (
     cd /tmp;
 
-    /workspaces/legate/scripts/generate-conda-envs.py \
+    ~/legate/scripts/generate-conda-envs.py \
         --ctk ${CUDA_VERSION} \
         --python ${PYTHON_VERSION} \
         --os linux --compilers --openmpi;
@@ -41,7 +46,7 @@ fi
 
 skbuild_dir="$(python -c 'import skbuild; print(skbuild.constants.SKBUILD_DIR())')";
 
-cat <<EOF > /workspaces/.clangd
+cat <<EOF > ~/.clangd
 If:
   PathMatch: .*\.cuh?
 CompileFlags:
@@ -51,10 +56,10 @@ CompileFlags:
 If:
   PathMatch: legate\.core/.*
 CompileFlags:
-  CompilationDatabase: /workspaces/legate/${skbuild_dir}/cmake-build
+  CompilationDatabase: $HOME/legate/${skbuild_dir}/cmake-build
 ---
 If:
   PathMatch: cunumeric/.*
 CompileFlags:
-  CompilationDatabase: /workspaces/cunumeric/${skbuild_dir}/cmake-build
+  CompilationDatabase: $HOME/cunumeric/${skbuild_dir}/cmake-build
 EOF

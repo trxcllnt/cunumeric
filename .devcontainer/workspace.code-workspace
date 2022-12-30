@@ -1,27 +1,12 @@
 {
   "folders": [
-    {
-      "path": "/workspaces/cunumeric",
-      "name": "cunumeric"
-    },
-    {
-      "path": "/workspaces/legate",
-      "name": "legate"
-    },
-    {
-      "path": "/workspaces/legion",
-      "name": "legion"
-    },
-    {
-      "path": "/workspaces/.conda",
-      "name": ".conda"
-    },
-    {
-      "path": "/workspaces/.cache",
-      "name": ".cache"
-    },
+    { "path": "cunumeric" },
+    { "path": "legate" },
+    { "path": "legion" },
+    { "path": ".conda" },
+    { "path": ".cache" },
   ],
   "settings": {
-    "terminal.integrated.cwd": "/home/coder/${workspaceFolderBasename}",
+    "terminal.integrated.cwd": "",
   }
 }

@@ -1,21 +1,7 @@
 #! /usr/bin/env bash
 
-if [[ $(glab auth status 2>&1 | grep 401 &>/dev/null; echo $?) == 0 ]]; then
-    if [[ "${CODESPACES:-false}" == true ]]; then
-        glab config set --global git_protocol https;
-    fi
-    glab auth login --hostname gitlab.com;
-fi
-
-if [[ -z "$GITLAB_USER" ]]; then
-    if [[ -f "$HOME/.config/glab-cli/config.yml" ]]; then
-        GITLAB_USER="$(grep --color=never 'user:' "$HOME/.config/glab-cli/config.yml" | cut -d ':' -f2 | tr -d '[:space:]' || echo '')";
-    fi
-fi
-
-if [[ -z "$GITLAB_USER" ]]; then
-    exit 1;
-fi
+. /opt/legate/bin/init-gitlab-cli.sh || exit $?;
+if [[ -z "$GITLAB_USER" ]]; then exit 1; fi
 
 NAME="$2";
 UPSTREAM="$1/$NAME";
@@ -39,6 +25,6 @@ Fork \`$UPSTREAM_URL\` into \`$ORIGIN_URL\` now (y/n)? " CHOICE </dev/tty
     done;
 fi
 
-if [ ! -d "/workspaces/${3:-$NAME}/.git" ]; then
-    glab repo clone "$REPO" "/workspaces/${3:-$NAME}";
+if [ ! -d ~/${3:-$NAME}/.git ]; then
+    glab repo clone "$REPO" ~/${3:-$NAME};
 fi
