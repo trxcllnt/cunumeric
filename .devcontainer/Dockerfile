@@ -27,6 +27,9 @@ DEBIAN_FRONTEND=noninteractive apt install    \
     /usr/local/src/gitlab-cli/gitlab-cli.deb  \
     ;
 
+gh completion -s bash | tee /etc/bash_completion.d/gh >/dev/null;
+glab completion -s bash | tee /etc/bash_completion.d/glab >/dev/null;
+
 mkdir -m 0777 -p /workspaces /workspaces/{.cache,.conda,legion,legate,cunumeric};
 
 rm -rf /home/coder/.{cache,conda};
@@ -36,8 +39,8 @@ ln -s /workspaces/legion /home/coder/legion;
 ln -s /workspaces/legate /home/coder/legate;
 ln -s /workspaces/cunumeric /home/coder/cunumeric;
 
-sed -i -re 's/^HISTSIZE=.*$/HISTSIZE=;/g' /home/coder/.bashrc; \
-sed -i -re 's/^HISTFILESIZE=.*$/HISTFILESIZE=;/g' /home/coder/.bashrc; \
+sed -i -re 's/^HISTSIZE=.*$/HISTSIZE=;/g' /home/coder/.bashrc;
+sed -i -re 's/^HISTFILESIZE=.*$/HISTFILESIZE=;/g' /home/coder/.bashrc;
 cat <<EOF2 >> /home/coder/.bashrc
 HISTFILE="/workspaces/.cache/._bash_history";
 PROMPT_COMMAND="history -a; \$PROMPT_COMMAND";

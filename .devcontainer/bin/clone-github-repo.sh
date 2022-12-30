@@ -1,7 +1,11 @@
 #! /usr/bin/env bash
 
 if [[ $(gh auth status &>/dev/null; echo $?) != 0 ]]; then
-    gh auth login -p ssh --web;
+    if [[ "${CODESPACES:-false}" == true ]]; then
+        gh config set git_protocol https;
+    fi
+    gh auth login --web;
+    gh auth setup-git --hostname github.com;
 fi
 
 if [[ -z "$GITHUB_USER" ]]; then

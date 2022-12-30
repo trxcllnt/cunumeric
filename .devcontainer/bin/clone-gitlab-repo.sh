@@ -1,6 +1,9 @@
 #! /usr/bin/env bash
 
 if [[ $(glab auth status 2>&1 | grep 401 &>/dev/null; echo $?) == 0 ]]; then
+    if [[ "${CODESPACES:-false}" == true ]]; then
+        glab config set --global git_protocol https;
+    fi
     glab auth login --hostname gitlab.com;
 fi
 
