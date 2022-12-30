@@ -1,24 +1,24 @@
 {
   "folders": [
     {
-      "path": "/workspaces/.cache",
-      "name": ".cache"
-    },
-    {
-      "path": "/workspaces/.conda",
-      "name": ".conda"
-    },
-    {
-      "path": "/workspaces/legion",
-      "name": "legion"
+      "path": "/workspaces/cunumeric",
+      "name": "cunumeric"
     },
     {
       "path": "/workspaces/legate",
       "name": "legate"
     },
     {
-      "path": "/workspaces/cunumeric",
-      "name": "cunumeric"
+      "path": "/workspaces/legion",
+      "name": "legion"
+    },
+    {
+      "path": "/workspaces/.conda",
+      "name": ".conda"
+    },
+    {
+      "path": "/workspaces/.cache",
+      "name": ".cache"
     },
   ],
   "settings": {
