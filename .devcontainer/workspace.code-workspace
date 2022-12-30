@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "path": "/home/coder/cunumeric",
+      "name": "cunumeric"
+    },
+    {
+      "path": "/home/coder/legate.core",
+      "name": "legate.core"
+    },
+    {
+      "path": "/home/coder/legion",
+      "name": "legion"
+    },
+    {
+      "path": "/home/coder/.conda",
+      "name": ".conda"
+    }
+  ]
+}

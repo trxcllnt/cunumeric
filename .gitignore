@@ -41,4 +41,5 @@ cunumeric/install_info.py
 /dist
 /_skbuild
 /_cmake_test_compile
+.devcontainer/._bash_history
 !.devcontainer/devcontainer.json

@@ -9,8 +9,10 @@
     "gpu": true
   },
   "initializeCommand": "mkdir -p ../.cache ../.conda ../legion ../legate.core",
-  "postStartCommand": "/opt/legate/bin/make-legate-test-env",
-  "workspaceFolder": "/workspaces",
+  "updateContentCommand": ["/opt/legate/bin/make-legate-test-env"],
+  "postAttachCommand": ["/opt/legate/bin/open-vscode-workspace"],
+  "workspaceFolder": "/home/coder",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/coder/${localWorkspaceFolderBasename},type=bind,consistency=cached",
   "mounts": [
     {
       "type": "bind",
@@ -24,15 +26,18 @@
     },
     {
       "type": "bind",
-      "target": "/workspaces/legion",
+      "target": "/home/coder/legion",
       "source": "${localWorkspaceFolder}/../legion"
     },
     {
       "type": "bind",
-      "target": "/workspaces/legate.core",
+      "target": "/home/coder/legate.core",
       "source": "${localWorkspaceFolder}/../legate.core"
     }
   ],
+  "containerEnv": {
+    "CONDA_DEFAULT_ENV": "legate"
+  },
   "customizations": {
     "vscode": {
       "extensions": [

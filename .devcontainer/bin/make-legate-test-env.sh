@@ -6,25 +6,20 @@ if [ -z "$PYTHON_VERSION" ]; then
     PYTHON_VERSION="$(python3 --version 2>&1 | cut -d' ' -f2 | cut -d'.' -f3 --complement)"
 fi
 
-env_yaml="environment-test-linux-py${PYTHON_VERSION}-cuda${CUDA_VERSION}-compilers-openmpi.yaml"
-
-# We can do this if we want a conda env per cunumeric branch.
-# However, that will change the include paths so new branches
-# won't benefit from sccache the first time they're built.
-# env_name="legate-test-$(cd /workspaces/cunumeric; git rev-parse --abbrev-ref HEAD)"
-# env_name="${env_name//\//_}"
+env_yaml="/tmp/environment-test-linux-py${PYTHON_VERSION}-cuda${CUDA_VERSION}-compilers-openmpi.yaml"
 
 # Use a consistent name and assume re-running `make-legate-test-env` after switching
 # branches will be fast because we use mamba and most packages will be in the local
 # conda package cache.
-env_name="legate-test"
+env_name="legate"
 
+/opt/legate/bin/clone-legion;
 /opt/legate/bin/clone-legate-core;
 
 (
     cd /tmp
 
-    /workspaces/legate.core/scripts/generate-conda-envs.py \
+    $HOME/legate.core/scripts/generate-conda-envs.py \
         --ctk ${CUDA_VERSION} \
         --python ${PYTHON_VERSION} \
         --os linux --compilers --openmpi
@@ -34,21 +29,20 @@ env_name="legate-test"
 EOF
 )
 
-sed -ri "s/legate-test/$env_name/g" "/tmp/$env_yaml";
+sed -i -re "s/legate-test/$env_name/g" "$env_yaml";
+# Remove clang and clang-tools from the conda env
+sed -i -re "s/^(\s+\- clang(-tools)?)(.*?)$//g" "$env_yaml";
 
-# Strip out clang and clang-tools
-cat "/tmp/$env_yaml" \
-  | grep -v -P '^(.*?)\-(.*?)(clang|clang-tools)(.*?)$' \
-  | sponge "/tmp/$env_yaml"
-
-if [[ "$(conda info -e | grep -q $env_name; echo $?)" == 0 ]]; \
-then mamba env update -n $env_name -f "/tmp/$env_yaml"; \
-else mamba env create -n $env_name -f "/tmp/$env_yaml"; \
+if [[ "$(conda info -e | grep -q "$env_name"; echo $?)" == 0 ]];
+then mamba env update -n "$env_name" -f "$env_yaml";
+else mamba env create -n "$env_name" -f "$env_yaml";
 fi
 
-sed -ri "s/conda activate base/conda activate $env_name/g" ~/.bashrc;
+. /opt/conda/etc/profile.d/conda.sh && conda activate "$env_name";
 
-cat <<EOF > /workspaces/.clangd
+skbuild_dir="$(python -c 'import skbuild; print(skbuild.constants.SKBUILD_DIR())')";
+
+cat <<EOF > $HOME/.clangd
 If:
   PathMatch: .*\.cuh?
 CompileFlags:
@@ -58,10 +52,10 @@ CompileFlags:
 If:
   PathMatch: legate\.core/.*
 CompileFlags:
-  CompilationDatabase: legate.core/_skbuild/linux-$(uname -m)-${PYTHON_VERSION}/cmake-build
+  CompilationDatabase: $HOME/legate.core/${skbuild_dir}/cmake-build
 ---
 If:
   PathMatch: cunumeric/.*
 CompileFlags:
-  CompilationDatabase: cunumeric/_skbuild/linux-$(uname -m)-${PYTHON_VERSION}/cmake-build
+  CompilationDatabase: $HOME/cunumeric/${skbuild_dir}/cmake-build
 EOF
