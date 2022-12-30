@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+set -x;
+
 if [[ $(glab auth status &>/dev/null; echo $?) != 0 ]]; then
     glab auth login --hostname gitlab.com;
 fi
