@@ -2,6 +2,6 @@
 
 set -x;
 
-if [ ! -d "/workspaces/legion/.git" ]; then
+if [[ ! -d "/workspaces/legion/.git" ]]; then
     clone-gitlab-repo "StanfordLegion" "legion";
 fi

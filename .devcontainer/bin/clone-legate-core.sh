@@ -4,7 +4,7 @@ set -x;
 
 generate_conda_envs_py="legate/scripts/generate-conda-envs.py";
 
-if [ ! -d "/workspaces/legate/.git" ]; then
+if [[ ! -d "/workspaces/legate/.git" ]]; then
     clone-github-repo "nv-legate" "legate.core" "legate";
 fi
 
