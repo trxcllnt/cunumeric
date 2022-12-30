@@ -14,7 +14,7 @@ FROM ${TARGETARCH}-files as files
 
 FROM base
 
-SHELL ["/bin/bash", "-Eeox", "pipefail", "-c"]
+SHELL ["/bin/bash", "-c"]
 
 USER root
 

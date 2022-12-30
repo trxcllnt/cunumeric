@@ -1,7 +1,5 @@
 #! /usr/bin/env bash
 
-set -x;
-
 if [[ $(gh auth status &>/dev/null; echo $?) != 0 ]]; then
     gh auth login -p ssh --web;
 fi
