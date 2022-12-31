@@ -12,7 +12,6 @@
   "initializeCommand": "mkdir -p ../.cache ../.conda ../legion ../legate",
   "updateContentCommand": ["/opt/devcontainer/bin/update-content-command.sh"],
   "postStartCommand": ["/opt/devcontainer/bin/post-start-command.sh"],
-  "postAttachCommand": ["/opt/devcontainer/bin/post-attach-command.sh"],
 
   "workspaceFolder": "/home/coder",
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/coder/cunumeric,type=bind",
