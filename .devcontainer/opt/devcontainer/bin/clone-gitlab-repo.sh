@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-. /opt/legate/bin/init-gitlab-cli.sh || exit $?;
+. /opt/devcontainer/bin/init-gitlab-cli.sh || exit $?;
 if [[ -z "$GITLAB_USER" ]]; then exit 1; fi
 
 NAME="$2";

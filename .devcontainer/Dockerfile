@@ -63,13 +63,13 @@ SHELL ["/bin/bash", "-c"]
 
 COPY --chown=coder:coder workspace.code-workspace /home/coder/
 
-COPY --chown=root:root opt/legate/bin /opt/legate/bin
+COPY --chown=root:root opt/legate /opt/legate
+COPY --chown=root:root opt/devcontainer /opt/devcontainer
 
 ENV SCCACHE_S3_USE_SSL=true
 ENV SCCACHE_IDLE_TIMEOUT=32768
 
 ENV PYTHONDONTWRITEBYTECODE=1
-ENV PATH="${PATH}:/opt/legate/bin"
 ENV CMAKE_C_COMPILER_LAUNCHER=/usr/bin/sccache
 ENV CMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/sccache
 ENV CMAKE_CUDA_COMPILER_LAUNCHER=/usr/bin/sccache

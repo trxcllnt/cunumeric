@@ -4,7 +4,7 @@
 # Try to reopen this vscode window to the ~/workspace.code-workspace file.
 ##
 
-set -ux;
+set -u;
 
 _file="$HOME/workspace.code-workspace";
 _code="$(echo /vscode/vscode-server/bin/linux-*/*/bin/remote-cli/code)";

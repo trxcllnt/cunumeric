@@ -10,8 +10,8 @@
   },
 
   "initializeCommand": "mkdir -p ../.cache ../.conda ../legion ../legate",
-  "postStartCommand": "/opt/legate/bin/devcontainer/post-start-command.sh",
-  "postAttachCommand": "/opt/legate/bin/devcontainer/post-attach-command.sh",
+  "postStartCommand": "/opt/devcontainer/bin/post-start-command.sh",
+  "postAttachCommand": "/opt/devcontainer/bin/post-attach-command.sh",
 
   "workspaceFolder": "/home/coder",
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/coder/cunumeric,type=bind",

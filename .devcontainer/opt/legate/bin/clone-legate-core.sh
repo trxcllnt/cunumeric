@@ -3,7 +3,7 @@
 generate_conda_envs_py="legate/scripts/generate-conda-envs.py";
 
 if [[ ! -d ~/legate/.git ]]; then
-    /opt/legate/bin/clone-github-repo.sh "nv-legate" "legate.core" "legate";
+    /opt/devcontainer/bin/clone-github-repo.sh "nv-legate" "legate.core" "legate";
 fi
 
 if [[ ! -f ~/$generate_conda_envs_py ]]; then

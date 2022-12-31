@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-. /opt/legate/bin/init-github-cli.sh || exit $?;
+. /opt/devcontainer/bin/init-github-cli.sh || exit $?;
 if [[ -z "$GITHUB_USER" ]]; then exit 1; fi
 
 NAME="$2";

@@ -5,7 +5,7 @@ git config --global devcontainers-theme.hide-status 1;
 git config --global devcontainers-theme.show-dirty 0;
 
 if [[ -z "$(git config --get user.name)" ]]; then
-    . /opt/legate/bin/init-github-cli.sh || exit $?;
+    . /opt/devcontainer/bin/init-github-cli.sh || exit $?;
     git_user_name="$(gh api user --jq '.name')";
     if [[ -z $git_user_name ]]; then
         read -p "Git user.name: " git_user_name </dev/tty;
@@ -14,7 +14,7 @@ if [[ -z "$(git config --get user.name)" ]]; then
 fi
 
 if [[ -z "$(git config --get user.email)" ]]; then
-    . /opt/legate/bin/init-github-cli.sh || exit $?;
+    . /opt/devcontainer/bin/init-github-cli.sh || exit $?;
     git_user_email="$(gh api user/emails --jq '. | map(select(.primary == true)) | map(.email)[]')";
     if [[ -z $git_user_email ]]; then
         read -p "Git user.email: " git_user_email </dev/tty;
