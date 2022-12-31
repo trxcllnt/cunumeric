@@ -2,7 +2,6 @@
 
 if [[ "${CODESPACES:-false}" == true ]]; then
     gh config set git_protocol https;
-    gh auth setup-git --hostname github.com;
 fi
 
 if [[ $(gh auth status &>/dev/null; echo $?) != 0 ]]; then
@@ -11,6 +10,7 @@ if [[ $(gh auth status &>/dev/null; echo $?) != 0 ]]; then
     else
         gh auth login --web --scopes user:email;
     fi
+    gh auth setup-git --hostname github.com;
 fi
 
 if [[ -z "$GITHUB_USER" ]]; then
