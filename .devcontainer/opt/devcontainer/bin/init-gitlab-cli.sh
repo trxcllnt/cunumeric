@@ -21,14 +21,22 @@ if [[ "${CODESPACES:-false}" == true ]]; then
     glab config set --global git_protocol https;
 fi
 
-if [[ $(glab auth status 2>&1 | grep 401 &>/dev/null; echo $?) == 0 ]]; then
-    glab auth login --hostname gitlab.com;
+if [[ $(glab auth status 2>&1 | grep "No token provided" &>/dev/null; echo $?) == 0 ]]; then
+    if [[ -z "$GITLAB_TOKEN" ]]; then
+        glab auth login --hostname gitlab.com;
+    else
+        glab auth login  --hostname gitlab.com --stdin < <(echo $GITLAB_TOKEN);
+    fi
 fi
 
 if [[ -z "$GITLAB_USER" ]]; then
     if [[ -f ~/.config/glab-cli/config.yml ]]; then
         GITLAB_USER="$(grep --color=never 'user:' ~/.config/glab-cli/config.yml | cut -d ':' -f2 | tr -d '[:space:]' || echo '')";
     fi
+fi
+
+if [[ -z "$GITLAB_USER" ]]; then
+    GITLAB_USER="$(glab api user | jq -r '.username')";
 fi
 
 if [[ -z "$GITLAB_USER" ]]; then

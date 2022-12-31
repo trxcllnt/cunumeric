@@ -20,6 +20,10 @@ if [[ -z "$GITHUB_USER" ]]; then
 fi
 
 if [[ -z "$GITHUB_USER" ]]; then
+    GITHUB_USER="$(gh api user --jq '.login')";
+fi
+
+if [[ -z "$GITHUB_USER" ]]; then
     exit 1;
 fi
 
