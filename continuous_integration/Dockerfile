@@ -77,6 +77,8 @@ COPY --from=build /home/coder/.artifacts /home/coder/.artifacts
 RUN --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core,rw \
 <<EOF
 
+sudo mkdir -p /run/secrets;
+
 . entrypoint;
 
 sudo chown -R $(id -u):$(id -g) ~/.artifacts/legate_core;
@@ -84,13 +86,13 @@ sudo chown -R $(id -u):$(id -g) ~/.artifacts/legate_core;
 mamba create -yn ${DEFAULT_CONDA_ENV:-legate};
 
 mamba install -yn ${DEFAULT_CONDA_ENV:-legate}      \
-    # local cunumeric channel first
+    `# local cunumeric channel first`               \
     -c ~/.artifacts/cunumeric                       \
-    # local legate_core channel next
+    `# local legate_core channel next`              \
     -c ~/.artifacts/legate_core                     \
-    # then conda-forge
+    `# then conda-forge`                            \
     -c conda-forge                                  \
-    # and finally nvidia
+    `# and finally nvidia`                          \
     -c nvidia                                       \
     cunumeric legate-core                           \
     mypy pytest pytest-mock ipython jupyter_client  \
