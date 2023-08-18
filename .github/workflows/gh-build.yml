@@ -46,7 +46,7 @@ jobs:
           legate_git_url=$(gh repo view $legate_git_url --json 'nameWithOwner' --jq '.nameWithOwner');
           echo "legate_git_url='$legate_git_url'";
           echo "legate_git_tag='$legate_git_tag'";
-          cat<<EOF >> $GITHUB_OUTPUT
+          cat<<EOF >> $GITHUB_ENV
           legate_git_url=$legate_git_url
           legate_git_tag=$legate_git_tag
           EOF
@@ -64,7 +64,7 @@ jobs:
         run: |
           legate_git_sha=$(git -C legate log -n1 --pretty=format:"%H")
           echo "legate_git_sha='$legate_git_sha'";
-          cat<<EOF >> $GITHUB_OUTPUT
+          cat<<EOF >> $GITHUB_ENV
           legate_git_sha=$legate_git_sha
           EOF
 
