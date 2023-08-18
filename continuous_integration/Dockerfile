@@ -40,12 +40,16 @@ RUN --mount=type=secret,id=GH_TOKEN,uid=1000,gid=1000              \
     --mount=type=secret,id=AWS_ACCESS_KEY_ID,uid=1000,gid=1000     \
     --mount=type=secret,id=AWS_SESSION_TOKEN,uid=1000,gid=1000     \
     --mount=type=secret,id=AWS_SECRET_ACCESS_KEY,uid=1000,gid=1000 \
-    --mount=type=bind,source=cunumeric,target=/home/coder/cunumeric \
-    --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core \
+    --mount=type=bind,source=cunumeric,target=/home/coder/cunumeric,rw \
+    --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core,rw \
 <<EOF
+
 . entrypoint;
 
+sudo chown -R $(id -u):$(id -g) ~/.artifacts/legate_core;
+
 mamba create -yn ${DEFAULT_CONDA_ENV:-legate};
+
 mamba install -yn ${DEFAULT_CONDA_ENV:-legate} \
     # local legate_core channel first
     -c ~/.artifacts/legate_core                \
@@ -67,9 +71,16 @@ COPY --from=build /home/coder/.artifacts /home/coder/.artifacts
 
 # Create a fresh conda env from the new cunumeric package
 
-RUN --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core \
-    mamba create -yn ${DEFAULT_CONDA_ENV:-legate}   \
- && mamba install -yn ${DEFAULT_CONDA_ENV:-legate}  \
+RUN --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core,rw \
+<<EOF
+
+. entrypoint;
+
+sudo chown -R $(id -u):$(id -g) ~/.artifacts/legate_core;
+
+mamba create -yn ${DEFAULT_CONDA_ENV:-legate};
+
+mamba install -yn ${DEFAULT_CONDA_ENV:-legate}      \
     # local cunumeric channel first
     -c ~/.artifacts/cunumeric                       \
     # local legate_core channel next
@@ -81,3 +92,5 @@ RUN --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifact
     cunumeric                                       \
     mypy pytest pytest-mock ipython jupyter_client  \
     ;
+
+EOF
