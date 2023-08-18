@@ -11,8 +11,8 @@ on:
 jobs:
   build:
     name: "Build cunumeric (with ${{ inputs.build-target }} legate) on GH"
-    uses:
-      ./.github/workflows/gh-build.yml
+    secrets: inherit
+    uses: ./.github/workflows/gh-build.yml
     with:
       build-target: ${{ inputs.build-target }}
       # Ref: https://docs.rapids.ai/resources/github-actions/#cpu-labels for `linux-amd64-cpu4`
@@ -25,8 +25,8 @@ jobs:
 
     # This ensures the cleanup job runs even if previous jobs fail or the workflow is cancelled.
     if: always()
-    uses:
-      ./.github/workflows/gh-cleanup.yml
+    secrets: inherit
+    uses: ./.github/workflows/gh-cleanup.yml
     with:
       build-target: ${{ inputs.build-target }}
       sha: ${{ inputs.sha }}

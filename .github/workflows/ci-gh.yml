@@ -25,8 +25,8 @@ jobs:
         include:
           - {build-target: cpu}
           - {build-target: gpu}
-    uses:
-      ./.github/workflows/gh-build-and-test.yml
+    secrets: inherit
+    uses: ./.github/workflows/gh-build-and-test.yml
     with:
       build-target: ${{ matrix.build-target }}
       sha: ${{ github.sha }}

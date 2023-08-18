@@ -44,18 +44,22 @@ RUN --mount=type=secret,id=GH_TOKEN,uid=1000,gid=1000              \
     --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core,rw \
 <<EOF
 
-. entrypoint;
+set -x;
 
 sudo chown -R $(id -u):$(id -g) ~/.artifacts/legate_core;
+
+cat $(which entrypoint);
+
+. entrypoint;
 
 mamba create -yn ${DEFAULT_CONDA_ENV:-legate};
 
 mamba install -yn ${DEFAULT_CONDA_ENV:-legate} \
-    # local legate_core channel first
+    `# local legate_core channel first`        \
     -c ~/.artifacts/legate_core                \
-    # then conda-forge
+    `# then conda-forge`                       \
     -c conda-forge                             \
-    # and finally nvidia
+    `# and finally nvidia`                     \
     -c nvidia                                  \
     legate-core                                \
     ;
