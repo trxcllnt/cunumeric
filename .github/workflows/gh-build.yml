@@ -75,7 +75,7 @@ jobs:
           repo: ${{ env.legate_git_url }}
           commit: ${{ env.legate_git_sha }}
           workflow_conclusion: success
-          workflow: "build-${{ inputs.build-target }}-sub-workflow"
+          workflow: "ci-gh-${{ inputs.build-target }}-build-and-test.yml"
 
       - if: github.repository_owner == 'nv-legate'
         name: Get AWS credentials for sccache bucket
