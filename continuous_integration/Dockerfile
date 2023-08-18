@@ -44,13 +44,9 @@ RUN --mount=type=secret,id=GH_TOKEN,uid=1000,gid=1000              \
     --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core,rw \
 <<EOF
 
-set -x;
+. entrypoint;
 
 sudo chown -R $(id -u):$(id -g) ~/.artifacts/legate_core;
-
-cat $(which entrypoint);
-
-. entrypoint;
 
 mamba create -yn ${DEFAULT_CONDA_ENV:-legate};
 
