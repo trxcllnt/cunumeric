@@ -67,7 +67,8 @@ COPY --from=build /home/coder/.artifacts /home/coder/.artifacts
 
 # Create a fresh conda env from the new cunumeric package
 
-RUN mamba create -yn ${DEFAULT_CONDA_ENV:-legate}   \
+RUN --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core \
+    mamba create -yn ${DEFAULT_CONDA_ENV:-legate}   \
  && mamba install -yn ${DEFAULT_CONDA_ENV:-legate}  \
     # local cunumeric channel first
     -c ~/.artifacts/cunumeric                       \
