@@ -3,10 +3,10 @@
 build_cunumeric_wheel() {
     set -xeuo pipefail;
 
-    mkdir -p /tmp/out;
+    mkdir -p ~/.artifacts;
 
     local pip_args=(-vv);
-    pip_args+=(--wheel-dir /tmp/out);
+    pip_args+=(--wheel-dir ~/.artifacts);
 
     if type conda 2>&1 >/dev/null; then
         pip_args+=(--no-deps);

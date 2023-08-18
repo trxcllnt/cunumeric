@@ -9,9 +9,9 @@ build_cunumeric_all() {
 
     set -euo pipefail;
 
-    build-cunumeric-cpp;
-    build-cunumeric-wheel;
-    build-cunumeric-conda;
+    mamba run -n "${DEFAULT_CONDA_ENV:-legate}" --cwd ~/ --live-stream build-cunumeric-cpp;
+    mamba run -n "${DEFAULT_CONDA_ENV:-legate}" --cwd ~/ --live-stream build-cunumeric-wheel;
+    mamba run -n "${DEFAULT_CONDA_ENV:-legate}" --cwd ~/ --live-stream build-cunumeric-conda;
 }
 
 (build_cunumeric_all "$@");
