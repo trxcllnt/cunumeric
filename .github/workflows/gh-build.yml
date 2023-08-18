@@ -96,6 +96,10 @@ jobs:
         env:
           GH_TOKEN: "${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}"
         run: |
+
+          mv .artifacts/legate.core-${{ inputs.build-target }}-*/legate_core .artifacts/;
+          rm -rf .artifacts/legate.core-${{ inputs.build-target }}-*;
+
           docker build \
                --progress plain \
                --tag "$IMAGE_TAG" \
