@@ -5,13 +5,20 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  pull_request:
   push:
     branches:
       - "pull-request/[0-9]+"
       - "branch-*"
 
 jobs:
+  filter-by-triggering-event:
+    name: Filter by triggering event
+    uses: ./.github/workflows/filter-by-triggering-event.yml
+
   build-and-test:
+    needs: filter-by-triggering-event
+    if: needs.filter-by-triggering-event.outputs.ok == 'true'
     strategy:
       fail-fast: false
       matrix:
