@@ -36,19 +36,22 @@ COPY --chown=coder:coder cunumeric/continuous_integration/home/coder/.local/bin/
 FROM stage0 as build
 
 # Mount in secrets
-RUN --mount=type=secret,id=GH_TOKEN,uid=1000,gid=1000              \
-    --mount=type=secret,id=AWS_ACCESS_KEY_ID,uid=1000,gid=1000     \
-    --mount=type=secret,id=AWS_SESSION_TOKEN,uid=1000,gid=1000     \
-    --mount=type=secret,id=AWS_SECRET_ACCESS_KEY,uid=1000,gid=1000 \
-    --mount=type=bind,source=cunumeric,target=/home/coder/cunumeric,rw \
+RUN --mount=type=secret,id=GH_TOKEN,uid=1000,gid=1000                                            \
+    --mount=type=secret,id=AWS_ACCESS_KEY_ID,uid=1000,gid=1000                                   \
+    --mount=type=secret,id=AWS_SESSION_TOKEN,uid=1000,gid=1000                                   \
+    --mount=type=secret,id=AWS_SECRET_ACCESS_KEY,uid=1000,gid=1000                               \
+    --mount=type=bind,source=legate,target=/home/coder/legate,rw                                 \
+    --mount=type=bind,source=cunumeric,target=/home/coder/cunumeric,rw                           \
     --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core,rw \
 <<EOF
 
 . entrypoint;
 
+make-conda-env;
+
 sudo chown -R $(id -u):$(id -g) ~/.artifacts/legate_core;
 
-mamba create -yn ${DEFAULT_CONDA_ENV:-legate};
+mamba uninstall -y -n ${DEFAULT_CONDA_ENV:-legate} numpy;
 
 mamba install -yn ${DEFAULT_CONDA_ENV:-legate} \
     `# local legate_core channel first`        \
@@ -89,7 +92,7 @@ mamba install -yn ${DEFAULT_CONDA_ENV:-legate}      \
     -c conda-forge                                  \
     # and finally nvidia
     -c nvidia                                       \
-    cunumeric                                       \
+    cunumeric legate-core                           \
     mypy pytest pytest-mock ipython jupyter_client  \
     ;
 
