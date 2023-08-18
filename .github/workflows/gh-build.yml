@@ -38,6 +38,8 @@ jobs:
           path: cunumeric
 
       - name: Read legate.core repo info
+        env:
+          GH_TOKEN: "${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}"
         run: |
           legate_git_url=$(jq -r '.packages.legate_core.git_url' cunumeric/cmake/versions.json)
           legate_git_tag=$(jq -r '.packages.legate_core.git_tag' cunumeric/cmake/versions.json)
