@@ -39,9 +39,13 @@ jobs:
 
       - name: Read legate.core repo info
         run: |
-          cat<<EOF >> $GITHUB_OUTPUT
           legate_git_url=$(jq -r '.packages.legate_core.git_url' cunumeric/cmake/versions.json)
           legate_git_tag=$(jq -r '.packages.legate_core.git_tag' cunumeric/cmake/versions.json)
+          echo "legate_git_url='$legate_git_url'";
+          echo "legate_git_tag='$legate_git_tag'";
+          cat<<EOF >> $GITHUB_OUTPUT
+          legate_git_url=$legate_git_url
+          legate_git_tag=$legate_git_tag
           EOF
 
       - name: Checkout legate.core
@@ -55,8 +59,10 @@ jobs:
 
       - name: Read legate.core commit sha
         run: |
-          cat<<EOF >> $GITHUB_OUTPUT
           legate_git_sha=$(git -C legate log -n1 --pretty=format:"%H")
+          echo "legate_git_sha='$legate_git_sha'";
+          cat<<EOF >> $GITHUB_OUTPUT
+          legate_git_sha=$legate_git_sha
           EOF
 
       - name: Download legate.core conda artifacts
