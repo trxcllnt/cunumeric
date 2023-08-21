@@ -68,16 +68,30 @@ jobs:
           legate_git_sha=$legate_git_sha
           EOF
 
-      - name: Download legate.core conda artifacts
+      - id: cached_artifacts
+        name: Cache legate.core conda artifacts
+        uses: actions/cache@v3
+        with:
+          key: "${{ env.legate_git_url }}@${{ env.legate_git_sha }}-${{ inputs.build-target }}"
+          path: .artifacts
+
+      - if: ${{ steps.cached_artifacts.cache-hit != 'true' }}
+        name: Download legate.core conda artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
-          path: .artifacts
+          path: .artifacts-dl
           repo: ${{ env.legate_git_url }}
           commit: ${{ env.legate_git_sha }}
           workflow_conclusion: success
           workflow: "ci-gh-${{ inputs.build-target }}-build-and-test.yml"
           name: "legate.core-${{ inputs.build-target }}-[0-9a-z]{40}"
           name_is_regexp: true
+
+      - if: ${{ steps.cached_artifacts.cache-hit != 'true' }}
+        name: Move legate.core conda artifacts into cached dir
+        run: |
+          mkdir -p .artifacts;
+          mv .artifacts-dl/legate.core-${{ inputs.build-target }}-*/legate_core .artifacts/;
 
       - if: github.repository_owner == 'nv-legate'
         name: Get AWS credentials for sccache bucket
@@ -96,10 +110,6 @@ jobs:
         env:
           GH_TOKEN: "${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}"
         run: |
-
-          mv .artifacts/legate.core-${{ inputs.build-target }}-*/legate_core .artifacts/;
-          rm -rf .artifacts/legate.core-${{ inputs.build-target }}-*;
-
           docker build \
                --progress plain \
                --tag "$IMAGE_TAG" \
