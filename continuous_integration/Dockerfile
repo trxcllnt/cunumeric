@@ -1,44 +1,101 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=rapidsai/devcontainers:23.10-cpp-cuda11.8-mambaforge-ubuntu22.04
 FROM ${BASE_IMAGE} as stage0
 
-COPY --chown=coder:coder continuous_integration/home/coder/.local/bin/* /home/coder/.local/bin/
-COPY --chown=coder:coder . /home/coder/cunumeric
+SHELL ["/bin/bash", "-Eeou", "pipefail", "-c"]
 
-RUN chmod a+x /home/coder/.local/bin/*
+ARG USE_CUDA="ON"
+ENV USE_CUDA=${USE_CUDA}
 
-#---------------------------------------------------
-FROM stage0 as setup
+ARG BUILD_MARCH=nocona
+ENV BUILD_MARCH=${BUILD_MARCH}
+
+ARG AWS_DEFAULT_REGION
+ENV AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-east-2"}
+
+ARG AWS_REGION
+ENV AWS_REGION=${AWS_REGION:-${AWS_DEFAULT_REGION}}
+
+ENV DEFAULT_CONDA_ENV=legate
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV SCCACHE_REGION=${AWS_REGION}
+ENV SCCACHE_BUCKET="rapids-sccache-devs"
+ENV SCCACHE_S3_KEY_PREFIX=legate-cunumeric-dev
+ENV VAULT_HOST=https://vault.ops.k8s.rapids.ai
+# 8 hours
+ENV VAULT_S3_TTL="28800s"
 
 USER coder
+
+WORKDIR /home/coder/.artifacts
 WORKDIR /home/coder
 
-RUN set -x && . conda-utils && \
-    get_yaml_and_make_conda_env && \
-    install_legate_core_with_war
+COPY --chown=coder:coder legate/continuous_integration/home/coder/.local/bin/* /home/coder/.local/bin/
+COPY --chown=coder:coder cunumeric/continuous_integration/home/coder/.local/bin/* /home/coder/.local/bin/
 
 #---------------------------------------------------
-FROM setup as build
-USER coder
-WORKDIR /home/coder
+FROM stage0 as build
 
-ARG GITHUB_TOKEN
-ENV GITHUB_TOKEN=${GITHUB_TOKEN}
-ARG AWS_SESSION_TOKEN
-ENV AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
-ARG AWS_ACCESS_KEY_ID
-ENV AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-ARG AWS_SECRET_ACCESS_KEY
-ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+# Mount in secrets
+RUN --mount=type=secret,id=GH_TOKEN,uid=1000,gid=1000                                            \
+    --mount=type=secret,id=AWS_ACCESS_KEY_ID,uid=1000,gid=1000                                   \
+    --mount=type=secret,id=AWS_SESSION_TOKEN,uid=1000,gid=1000                                   \
+    --mount=type=secret,id=AWS_SECRET_ACCESS_KEY,uid=1000,gid=1000                               \
+    --mount=type=bind,source=legate,target=/home/coder/legate,rw                                 \
+    --mount=type=bind,source=cunumeric,target=/home/coder/cunumeric,rw                           \
+    --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core,rw \
+<<EOF
 
-COPY --chown=coder:coder .creds /run/secrets
+. entrypoint;
 
-RUN entrypoint build-cunumeric-all
+make-conda-env;
+
+sudo chown -R $(id -u):$(id -g) ~/.artifacts/legate_core;
+
+mamba uninstall -y -n ${DEFAULT_CONDA_ENV:-legate} numpy;
+
+mamba install -yn ${DEFAULT_CONDA_ENV:-legate} \
+    `# local legate_core channel first`        \
+    -c ~/.artifacts/legate_core                \
+    `# then conda-forge`                       \
+    -c conda-forge                             \
+    `# and finally nvidia`                     \
+    -c nvidia                                  \
+    legate-core                                \
+    ;
+
+build-cunumeric-all;
+
+EOF
 
 #---------------------------------------------------
 FROM stage0 as final
-USER coder
-WORKDIR /home/coder
 
-COPY --from=build --chown=coder:coder /tmp/out /tmp/out
-COPY --from=build --chown=coder:coder /tmp/conda-build /tmp/conda-build
-COPY --from=build --chown=coder:coder /tmp/env_yaml /tmp/env_yaml
+COPY --from=build /home/coder/.artifacts /home/coder/.artifacts
+
+# Create a fresh conda env from the new cunumeric package
+
+RUN --mount=type=bind,source=.artifacts/legate_core,target=/home/coder/.artifacts/legate_core,rw \
+<<EOF
+
+sudo mkdir -p /run/secrets;
+
+. entrypoint;
+
+sudo chown -R $(id -u):$(id -g) ~/.artifacts/legate_core;
+
+mamba create -yn ${DEFAULT_CONDA_ENV:-legate};
+
+mamba install -yn ${DEFAULT_CONDA_ENV:-legate}      \
+    `# local cunumeric channel first`               \
+    -c ~/.artifacts/cunumeric                       \
+    `# local legate_core channel next`              \
+    -c ~/.artifacts/legate_core                     \
+    `# then conda-forge`                            \
+    -c conda-forge                                  \
+    `# and finally nvidia`                          \
+    -c nvidia                                       \
+    cunumeric legate-core                           \
+    mypy pytest pytest-mock ipython jupyter_client  \
+    ;
+
+EOF

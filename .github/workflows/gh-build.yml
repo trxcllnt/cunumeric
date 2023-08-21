@@ -14,10 +14,8 @@ on:
         type: string
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  BASE_IMAGE: rapidsai/devcontainers:23.06-cpp-cuda11.8-mambaforge-ubuntu22.04
-  IMAGE_NAME_LEGATE: legate.core-${{ inputs.build-target }}
-  IMAGE_NAME_CUNUMERIC: cunumeric-${{ inputs.build-target }}
+  BASE_IMAGE: rapidsai/devcontainers:23.10-cpp-cuda11.8-mambaforge-ubuntu22.04
+  IMAGE_TAG: "cunumeric-${{ inputs.build-target }}:${{ inputs.sha }}"
   USE_CUDA: ${{ (inputs.build-target == 'cpu' && 'OFF') || 'ON' }}
 
 jobs:
@@ -32,18 +30,68 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
 
     steps:
-      - name: Checkout legate.core
-        uses: actions/checkout@v3
-        with:
-          repository: nv-legate/legate.core
-          fetch-depth: 0
-          path: legate
-
       - name: Checkout cunumeric (= this repo)
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          persist-credentials: false
           path: cunumeric
+
+      - name: Read legate.core repo info
+        env:
+          GH_TOKEN: "${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}"
+        run: |
+          legate_git_url=$(jq -r '.packages.legate_core.git_url' cunumeric/cmake/versions.json)
+          legate_git_tag=$(jq -r '.packages.legate_core.git_tag' cunumeric/cmake/versions.json)
+          legate_git_url=$(gh repo view $legate_git_url --json 'nameWithOwner' --jq '.nameWithOwner');
+          echo "legate_git_url='$legate_git_url'";
+          echo "legate_git_tag='$legate_git_tag'";
+          cat<<EOF >> $GITHUB_ENV
+          legate_git_url=$legate_git_url
+          legate_git_tag=$legate_git_tag
+          EOF
+
+      - name: Checkout legate.core
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          repository: ${{ env.legate_git_url }}
+          ref: ${{ env.legate_git_tag }}
+          path: legate
+
+      - name: Read legate.core commit sha
+        run: |
+          legate_git_sha=$(git -C legate log -n1 --pretty=format:"%H")
+          echo "legate_git_sha='$legate_git_sha'";
+          cat<<EOF >> $GITHUB_ENV
+          legate_git_sha=$legate_git_sha
+          EOF
+
+      - id: cached_artifacts
+        name: Cache legate.core conda artifacts
+        uses: actions/cache@v3
+        with:
+          key: "${{ env.legate_git_url }}@${{ env.legate_git_sha }}-${{ inputs.build-target }}"
+          path: .artifacts
+
+      - if: ${{ steps.cached_artifacts.cache-hit != 'true' }}
+        name: Download legate.core conda artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          path: .artifacts-dl
+          repo: ${{ env.legate_git_url }}
+          commit: ${{ env.legate_git_sha }}
+          workflow_conclusion: success
+          workflow: "ci-gh-${{ inputs.build-target }}-build-and-test.yml"
+          name: "legate.core-${{ inputs.build-target }}-[0-9a-z]{40}"
+          name_is_regexp: true
+
+      - if: ${{ steps.cached_artifacts.cache-hit != 'true' }}
+        name: Move legate.core conda artifacts into cached dir
+        run: |
+          mkdir -p .artifacts;
+          mv .artifacts-dl/legate.core-${{ inputs.build-target }}-*/legate_core .artifacts/;
 
       - if: github.repository_owner == 'nv-legate'
         name: Get AWS credentials for sccache bucket
@@ -58,60 +106,53 @@ jobs:
           docker version
           docker system prune --all --force
 
-      - name: Build legate.core using docker build
+      - name: Build docker image
+        env:
+          GH_TOKEN: "${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}"
         run: |
-          echo BUILD_TARGET: ${{ inputs.build-target }}
-          echo USE_CUDA: ${{ env.USE_CUDA }}
-
-          export LEGATE_SHA=$(cat cunumeric/cmake/versions.json | jq -r '.packages.legate_core.git_tag')
-          echo "Checking out LEGATE_SHA: ${LEGATE_SHA}"
-          git -C legate checkout $LEGATE_SHA
-
-          IMAGE_TAG_LEGATE=${{ env.IMAGE_NAME_LEGATE }}:${{ inputs.sha }}
-
-          chmod +x legate/continuous_integration/build-docker-image
-          legate/continuous_integration/build-docker-image \
-            --base-image "$BASE_IMAGE" \
-            --image-tag "$IMAGE_TAG_LEGATE" \
-            --source-dir legate
-
-      - name: Build cunumeric using docker build
-        run: |
-          IMAGE_TAG_CUNUMERIC=${{ env.IMAGE_NAME_CUNUMERIC }}:${{ inputs.sha }}
-          IMAGE_TAG_LEGATE=${{ env.IMAGE_NAME_LEGATE }}:${{ inputs.sha }}
-
-          legate/continuous_integration/build-docker-image \
-            --base-image "$IMAGE_TAG_LEGATE" \
-            --image-tag "$IMAGE_TAG_CUNUMERIC" \
-            --source-dir cunumeric
+          docker build \
+               --progress plain \
+               --tag "$IMAGE_TAG" \
+               --build-arg USE_CUDA="${USE_CUDA:-}" \
+               --build-arg AWS_REGION="${AWS_REGION:-}" \
+               --build-arg BASE_IMAGE="${BASE_IMAGE:-}" \
+               --secret id=GH_TOKEN,src=<(cat <<< "${GH_TOKEN:-}") \
+               --secret id=AWS_ACCESS_KEY_ID,src=<(cat <<< "${AWS_ACCESS_KEY_ID:-}") \
+               --secret id=AWS_SESSION_TOKEN,src=<(cat <<< "${AWS_SESSION_TOKEN:-}") \
+               --secret id=AWS_SECRET_ACCESS_KEY,src=<(cat <<< "${AWS_SECRET_ACCESS_KEY:-}") \
+               -f cunumeric/continuous_integration/Dockerfile \
+               .
 
       - name: Dump docker history of image before upload
         run: |
-          IMAGE_TAG=${{ env.IMAGE_NAME_CUNUMERIC }}:${{ inputs.sha }}
           docker history $IMAGE_TAG
 
-      - name: Log in to container image registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push cunumeric image
+      - name: Push image
         run: |
-          IMAGE_TAG=${{ env.IMAGE_NAME_CUNUMERIC }}:${{ inputs.sha }}
 
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}
 
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
           IMAGE_ID=$IMAGE_ID/$IMAGE_TAG
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=${IMAGE_ID,,}
 
           docker tag $IMAGE_TAG $IMAGE_ID
           docker push $IMAGE_ID
 
       - name: Copy artifacts back to the host
         run: |
-          IMAGE_TAG=${{ env.IMAGE_NAME_CUNUMERIC }}:${{ inputs.sha }}
-          mkdir -p artifacts
-          docker run  -v "$(pwd)/artifacts:/home/coder/.artifacts" --rm -t $IMAGE_TAG copy-artifacts
+          mkdir -p out;
+          docker run -v "$(pwd)/out:/out" --rm -t -u root $IMAGE_TAG \
+          sh -c "cp -ar /home/coder/.artifacts /out/ && chown -R $(id -u):$(id -g) /out";
+          mv out/.artifacts artifacts && rmdir out;
 
       - name: Display structure of workdir
         run: ls -R
